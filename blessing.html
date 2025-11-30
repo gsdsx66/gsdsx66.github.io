@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>祝福你！</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: #ffe6f0;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    .blessing {
+      position: absolute;
+      top: -50px;
+      color: #ff69b4;
+      font-size: 20px;
+      font-weight: bold;
+      white-space: nowrap;
+      opacity: 0;
+      animation: fall 6s linear forwards;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const blessings = [
+      "生日快乐！🎂",
+      "万事如意！✨",
+      "天天开心！😊",
+      "心想事成！🍀",
+      "平安喜乐！💖",
+      "好运连连！🌈",
+      "幸福满满！🥰",
+      "前程似锦！🌟"
+    ];
+
+    function createBlessing() {
+      const el = document.createElement("div");
+      el.className = "blessing";
+      el.innerText = blessings[Math.floor(Math.random() * blessings.length)];
+      
+      // 随机水平位置
+      el.style.left = Math.random() * 100 + "vw";
+      // 随机动画时长（4~8秒）
+      el.style.animationDuration = (4 + Math.random() * 4) + "s";
+
+      document.body.appendChild(el);
+
+      // 动画结束后移除元素，避免内存堆积
+      setTimeout(() => {
+        el.remove();
+      }, 8000);
+    }
+
+    // 每隔 500 毫秒生成一个祝福语
+    setInterval(createBlessing, 500);
+  </script>
+</body>
+</html>
