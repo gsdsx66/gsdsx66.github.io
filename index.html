@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>✨ 专属惊喜 ✨</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ff9eb1, #ffb8c9, #ffcce6);
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      position: relative;
+      color: white;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #start-heart {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 80px;
+      cursor: pointer;
+      z-index: 100;
+      animation: heartbeat 1.2s infinite;
+      text-align: center;
+    }
+
+    #start-text {
+      display: block;
+      font-size: 24px;
+      margin-top: 10px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .random-blessing {
+      position: absolute;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInOut 5s forwards;
+      max-width: 160px;
+      z-index: 10;
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .heart-emoji {
+      position: absolute;
+      font-size: 24px;
+      opacity: 0;
+      z-index: 40;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #final-blessing {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 20px 40px;
+      border-radius: 20px;
+      opacity: 0;
+      z-index: 999;
+      max-width: 80%;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 0 25px rgba(255,255,255,0.5);
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(15px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-15px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="start-heart">❤️<span id="start-text">小惊喜</span></div>
+  <canvas id="particles"></canvas>
+  <div id="final-blessing">要天天开心哦 💕</div>
+
+  <script>
+    const finalBlessing = "要天天开心哦 💕";
+    const bgMusicUrl = "https://example.com/bg-music.mp3"; // 替换为你的音乐 URL
+
+    let heartFountainTimer = null;
+    const heartEmojis = ['❤️', '💖', '💘', '💝', '💓'];
+
+    document.getElementById('start-heart').addEventListener('click', () => {
+      const audio = new Audio(bgMusicUrl);
+      audio.loop = true;
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log("音频播放被阻止:", e));
+
+      document.getElementById('start-heart').style.display = 'none';
+      startEffects();
+    });
+
+    function startEffects() {
+      createParticles();
+      startRandomBlessings();
+      startHeartFountain();
+      setTimeout(showFinalBlessing, 5000);
+    }
+
+    // 背景粒子（保留）
+    function createParticles() {
+      const canvas = document.getElementById('particles');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const particles = [];
+      const colors = ['#ff7aa2', '#ff9eb1', '#ffb8c9', '#ffffff'];
+      
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.5;
+          this.color = colors[Math.floor(Math.random() * colors.length)];
+          this.speedX = (Math.random() - 0.5) * 0.6;
+          this.speedY = (Math.random() - 0.5) * 0.6;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+          if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+        }
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      
+      for (let i = 0; i < 150; i++) particles.push(new Particle());
+      
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    // 随机祝福语（保留）
+    function startRandomBlessings() {
+      const blessings = [
+         "天天开心！", "心想事成！", "平安喜乐！",
+        "好运连连！", "幸福满满！", "青春永驻！", "笑口常开！",
+        "万事如意！", "可爱满分！", "甜度爆表！"
+      ];
+      
+      setInterval(() => {
+        const el = document.createElement('div');
+        el.className = 'random-blessing';
+        el.textContent = blessings[Math.floor(Math.random() * blessings.length)];
+        el.style.left = Math.random() * 85 + 5 + 'vw';
+        el.style.top = Math.random() * 80 + 5 + 'vh';
+        el.style.color = `hsl(${Math.random() * 360}, 80%, 90%)`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 5000);
+      }, 200);
+    }
+
+    // 爱心喷泉（核心：抛物线运动）
+    function startHeartFountain() {
+      // 发射频率：60ms/个（可调整）
+      heartFountainTimer = setInterval(() => {
+        createHeart();
+      }, 60);
+
+      // 10秒后停止发射
+      setTimeout(() => {
+        clearInterval(heartFountainTimer);
+      }, 10000);
+    }
+
+    // 创建单个爱心（抛物线运动核心逻辑）
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.className = 'heart-emoji';
+      heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+      
+      // 初始位置：底部居中偏下（屏幕外），水平随机
+      const startX = Math.random() * (window.innerWidth - 80) + 40; // 左右40px边距
+      const startY = window.innerHeight + 30; // 底部外30px
+      
+      // 随机属性
+      const size = Math.random() * 18 + 14; // 大小：14-32px
+      const opacity = Math.random() * 0.6 + 0.4; // 透明度：0.4-1
+      
+      // 抛物线核心参数（物理模拟）
+      const gravity = 0.08; // 重力加速度（越大下落越快）
+      const initialSpeedY = -(Math.random() * 5 + 4); // 初始垂直速度（向上为负）
+      const initialSpeedX = (Math.random() - 0.5) * 2; // 初始水平速度（左右偏移）
+      const maxLifetime = Math.random() * 80 + 120; // 最大生命周期（帧）
+      
+      // 初始状态
+      let frame = 0;
+      let currentX = startX;
+      let currentY = startY;
+      let currentSpeedY = initialSpeedY; // 垂直速度（受重力影响）
+      
+      // 样式初始化
+      heart.style.fontSize = `${size}px`;
+      heart.style.left = `${currentX}px`;
+      heart.style.top = `${currentY}px`;
+      heart.style.opacity = opacity;
+      document.body.appendChild(heart);
+      
+      // 抛物线动画核心
+      function animateHeart() {
+        frame++;
+        // 超出生命周期 或 落到屏幕外下方 → 移除
+        if (frame > maxLifetime || currentY > window.innerHeight + 50) {
+          heart.style.opacity = 0;
+          setTimeout(() => heart.remove(), 300);
+          return;
+        }
+        
+        // 1. 重力影响：垂直速度逐渐变大（从向上变为向下）
+        currentSpeedY += gravity;
+        // 2. 更新位置：水平匀速，垂直受速度影响
+        currentX += initialSpeedX;
+        currentY += currentSpeedY;
+        
+        // 3. 边界处理：水平超出屏幕则反弹（可选）
+        if (currentX < 0) currentX = window.innerWidth;
+        if (currentX > window.innerWidth) currentX = 0;
+        
+        // 4. 应用新位置
+        heart.style.left = `${currentX}px`;
+        heart.style.top = `${currentY}px`;
+        
+        // 5. 后期逐渐透明
+        if (frame > maxLifetime * 0.7) {
+          heart.style.opacity = opacity * (1 - (frame - maxLifetime * 0.7) / (maxLifetime * 0.3));
+        }
+        
+        requestAnimationFrame(animateHeart);
+      }
+      
+      requestAnimationFrame(animateHeart);
+    }
+
+    // 显示最终祝福语
+    function showFinalBlessing() {
+      const el = document.getElementById('final-blessing');
+      el.textContent = finalBlessing;
+      el.style.opacity = '1';
+      el.style.transition = 'opacity 1s ease';
+    }
+
+    // 窗口适配
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('particles');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
