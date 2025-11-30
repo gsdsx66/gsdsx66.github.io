@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>✨ 专属惊喜 ✨</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ff9eb1, #ffb8c9, #ffcce6);
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      position: relative;
+      color: white;
+    }
+
+    /* 开场爱心 */
+    #start-heart {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 80px;
+      cursor: pointer;
+      z-index: 100;
+      animation: heartbeat 1.2s infinite;
+      text-align: center;
+    }
+
+    #start-text {
+      display: block;
+      font-size: 24px;
+      margin-top: 10px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 随机祝福框 */
+    .random-blessing {
+      position: absolute;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInOut 5s forwards;
+      max-width: 180px;
+      z-index: 10;
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* 爱心轮廓文字 —— 放大 + 减少点数 */
+    .heart-outline {
+      position: absolute;
+      font-size: 24px; /* 放大字体 */
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.8s ease-out;
+      z-index: 40;
+    }
+
+    /* 最终祝福 —— 明确显示在中心 */
+    #final-blessing {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 20px 40px;
+      border-radius: 20px;
+      opacity: 0;
+      z-index: 30;
+      max-width: 80%;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 0 30px rgba(255,255,255,0.5);
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="start-heart">❤️<span id="start-text">小惊喜</span></div>
+  <canvas id="particles"></canvas>
+  <div id="final-blessing">你是我最珍贵的小可爱 💕</div>
+
+  <script>
+    const blessings = [
+      "生日快乐！", "天天开心！", "心想事成！", "平安喜乐！",
+      "好运连连！", "幸福满满！", "青春永驻！", "笑口常开！",
+      "万事如意！", "前程似锦！", "可爱满分！", "甜度爆表！",
+      "光芒万丈！", "被世界宠爱！", "梦想成真！", "闪闪发光！"
+    ];
+    const finalBlessing = "你是我最珍贵的小可爱 💕";
+
+    // ================== 开场点击 ==================
+    document.getElementById('start-heart').addEventListener('click', () => {
+      document.getElementById('start-heart').style.display = 'none';
+      startEffects();
+    });
+
+    // ================== 启动特效 ==================
+    function startEffects() {
+      createParticles();
+      startRandomBlessings();
+      buildHeartOutline().then(() => {
+        showFinalBlessing();
+      });
+    }
+
+    // ================== 粒子 & 随机祝福（不变）==================
+    function createParticles() {
+      const canvas = document.getElementById('particles');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const particles = [];
+      const colors = ['#ff7aa2', '#ff9eb1', '#ffb8c9', '#ffffff'];
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2.5 + 0.5;
+          this.color = colors[Math.floor(Math.random() * colors.length)];
+          this.speedX = (Math.random() - 0.5) * 0.8;
+          this.speedY = (Math.random() - 0.5) * 0.8;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+          if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+        }
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      for (let i = 0; i < 200; i++) particles.push(new Particle());
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    function startRandomBlessings() {
+      setInterval(() => {
+        const el = document.createElement('div');
+        el.className = 'random-blessing';
+        el.textContent = blessings[Math.floor(Math.random() * blessings.length)];
+        el.style.left = Math.random() * 85 + 5 + 'vw';
+        el.style.top = Math.random() * 80 + 5 + 'vh';
+        el.style.color = `hsl(${Math.random() * 360}, 80%, 90%)`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 5000);
+      }, 300);
+    }
+
+    // ================== 构建爱心轮廓（描边 + 放大）==================
+    function buildHeartOutline() {
+      return new Promise((resolve) => {
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        // 更稀疏的点，只取轮廓
+        const outlinePoints = [];
+        const scale = 4.5; // 更大
+        for (let t = 0; t < Math.PI * 2; t += 0.15) {
+          const x = 16 * Math.pow(Math.sin(t), 3);
+          const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+          // 只保留外圈点（避免内部填充）
+          if (Math.abs(x) > 10 || Math.abs(y) > 12) {
+            outlinePoints.push({x: x * scale, y: y * scale});
+          }
+        }
+
+        // 手动添加顶部和底部的点，确保完整
+        outlinePoints.push({x: 0, y: -100 * scale}); // 顶部尖
+        outlinePoints.push({x: 0, y: 100 * scale});  // 底部尖
+
+        outlinePoints.forEach((point, i) => {
+          setTimeout(() => {
+            const el = document.createElement('div');
+            el.className = 'heart-outline';
+            el.textContent = blessings[i % blessings.length];
+            el.style.left = (centerX + point.x) + 'px';
+            el.style.top = (centerY + point.y) + 'px';
+            el.style.color = `hsl(${340 + i * 4}, 90%, 90%)`;
+            document.body.appendChild(el);
+            setTimeout(() => el.style.opacity = '1', 50);
+
+            if (i === outlinePoints.length - 1) {
+              resolve();
+            }
+          }, i * 200); // 更慢，更有节奏
+        });
+      });
+    }
+
+    // ================== 显示最终祝福 ==================
+    function showFinalBlessing() {
+      const el = document.getElementById('final-blessing');
+      el.textContent = finalBlessing;
+      el.style.opacity = '1';
+      console.log("最终祝福已显示");
+    }
+  </script>
+</body>
+</html>
